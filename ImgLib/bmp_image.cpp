@@ -118,23 +118,36 @@ Image LoadBMP(const Path& file)
         
     ifs.read(reinterpret_cast<char*>(&file_header), sizeof(BitmapFileHeader));
     
-    if(!ifs)
-    {
-        return {};
-    }
-    
     ifs.read(reinterpret_cast<char*>(&info_header), sizeof(BitmapInfoHeader));
         
-    if(!ifs)
-    {
-        return {};
-    }
-    
     //########ConstValues########
+    const size_t header_sum = sizeof(BitmapFileHeader) + sizeof(BitmapInfoHeader);
     const int w = info_header.width;
     const int h = info_header.height;
     const int bmp_stride = GetBMPStride(w);
     //########ConstValues########
+    
+    if(!(file_header.signature[0] == 'B' && file_header.signature[1] == 'M') ||
+    file_header.size != header_sum + bmp_stride * h ||
+    file_header.reserved_space != 0 || 
+    file_header.stride != header_sum)
+    {
+        return {};
+    }
+    
+    if(info_header.header_size != sizeof(BitmapInfoHeader) ||
+       w <= 0 || h <= 0 ||
+       info_header.plane_amount != 1 || 
+       info_header.bits_per_pixel != 24 ||
+       info_header.compression_type != 0 ||
+       info_header.data_bytes != bmp_stride * h ||
+       info_header.horizontal_resolution != 11811 || info_header.vertical_resolution != 11811 ||
+       info_header.used_colors != 0 || info_header.colors != 0x1000000)
+    {
+        return {};
+    }
+    
+
 
     Image result(w, h, Color::Black());
     std::vector<char> buff(bmp_stride);
