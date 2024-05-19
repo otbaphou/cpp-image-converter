@@ -14,7 +14,12 @@ static const int PPM_MAX = 255;
 bool SavePPM(const Path& file, const Image& image) 
 {
     ofstream out(file, ios::binary);
-
+        
+    if(!out.is_open())
+    {
+        return false;
+    }
+    
     out << PPM_SIG << '\n' << image.GetWidth() << ' ' << image.GetHeight() << '\n' << PPM_MAX << '\n';
 
     const int w = image.GetWidth();
@@ -34,10 +39,17 @@ bool SavePPM(const Path& file, const Image& image)
     return out.good();
 }
 
-Image LoadPPM(const Path& file) {
+Image LoadPPM(const Path& file) 
+{
     // открываем поток с флагом ios::binary
     // поскольку будем читать данные в двоичном формате
     ifstream ifs(file, ios::binary);
+        
+    if(!ifs.is_open())
+    {
+        return {};
+    }
+    
     std::string sign;
     int w, h, color_max;
 

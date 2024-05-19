@@ -44,7 +44,6 @@ bool SaveJPEG(const Path& file, const Image& image)
     
     if ((outfile = std::fopen(file.c_str(), "wb")) == NULL) 
     {
-        //fprintf(stderr, "can't open %s\n", file);
         return false;
     }
     jpeg_stdio_dest(&cinfo, outfile);

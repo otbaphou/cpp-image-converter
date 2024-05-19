@@ -11,12 +11,9 @@ namespace img_lib {
 
 PACKED_STRUCT_BEGIN BitmapFileHeader 
 {
-    array<char, 2> signature; // = {'B', 'M'}
-    //Total file size including data and headers
+    array<char, 2> signature = {'B', 'M'};
     unsigned int size;
-    //Reserved space
-    int reserved_space;
-    //Stride from the file beginning
+    int reserved_space = 0;
     unsigned int stride;
 }
 PACKED_STRUCT_END
@@ -26,14 +23,14 @@ PACKED_STRUCT_BEGIN BitmapInfoHeader
     unsigned int header_size;
     int width;
     int height;
-    uint16_t plane_amount; // = 1;
-    uint16_t bits_per_pixel; // = 24;
-    unsigned int compression_type; // = 0;
+    uint16_t plane_amount = 1;
+    uint16_t bits_per_pixel = 24;
+    unsigned int compression_type = 0;
     unsigned int data_bytes;
-    int horizontal_resolution; // = 11811;
-    int vertical_resolution; // = 11811;
-    int used_colors; // = 0;
-    int colors; // = 0x1000000;
+    int horizontal_resolution = 11811;
+    int vertical_resolution = 11811;
+    int used_colors = 0;
+    int colors = 0x1000000;
 }
 PACKED_STRUCT_END
 
@@ -46,6 +43,11 @@ static int GetBMPStride(int w) {
 bool SaveBMP(const Path& file, const Image& image)
 {
     ofstream out(file, ios::binary);
+    
+    if(!out.is_open())
+    {
+        return false;
+    }
     
     //##########Headers##########
     BitmapFileHeader file_header;
@@ -104,13 +106,29 @@ bool SaveBMP(const Path& file, const Image& image)
 Image LoadBMP(const Path& file)
 {    
     ifstream ifs(file, ios::binary);
+        
+    if(!ifs.is_open())
+    {
+        return {};
+    }
     
     //##########Headers##########
     BitmapFileHeader file_header;
     BitmapInfoHeader info_header;
         
     ifs.read(reinterpret_cast<char*>(&file_header), sizeof(BitmapFileHeader));
+    
+    if(!ifs)
+    {
+        return {};
+    }
+    
     ifs.read(reinterpret_cast<char*>(&info_header), sizeof(BitmapInfoHeader));
+        
+    if(!ifs)
+    {
+        return {};
+    }
     
     //########ConstValues########
     const int w = info_header.width;
